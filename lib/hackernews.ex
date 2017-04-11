@@ -21,7 +21,7 @@ defmodule Hackernews do
     |> Enum.reject(&Enum.empty?/1)
   end
 
-  def pmap(collection, func, timeout_ms \\ 5_000) do
+  def pmap(collection, func, timeout_ms \\ 10_000) do
     collection
     |> Enum.map(&(Task.async(fn -> func.(&1) end)))
     |> Enum.map(fn t -> Task.await(t, timeout_ms) end)
@@ -32,8 +32,9 @@ defmodule Hackernews do
     |> get_body!
     |> Poison.Parser.parse!
     |> Enum.sort # To avoid cache becoming invalid due to reordering of stories!
-    |> Enum.chunk(25, 20, [])
+    |> Enum.chunk(25, 20, []) # TODO(john) should be configurable
     |> pmap(&download_stories/1)
+    
     File.write!("topstories.txt", data)
   end
 
@@ -48,10 +49,12 @@ defmodule Hackernews do
     |> Poison.Parser.parse!
     |> Enum.sort # To avoid cache becoming invalid due to reordering of stories!
     |> Enum.map(&:erlang.integer_to_binary/1)
+
     sha256 = body
     |> hash
     |> Integer.to_string(16)
     |> String.downcase
+
     {sha256, body}
   end
 
