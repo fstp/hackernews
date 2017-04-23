@@ -1,5 +1,5 @@
 defmodule Hackernews do
-  def main() do
+  def main(_argv) do
     topstories = download_topstories()
 
     sha256 = topstories
