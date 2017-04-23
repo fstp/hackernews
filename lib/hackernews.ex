@@ -22,21 +22,23 @@ defmodule Hackernews do
   end
 
   def download_stories(stories) do
-    Enum.map(stories, &download_story/1)
-    |> Enum.reject(&Enum.empty?/1)
+    {head, [tail]} = Enum.split(stories, -1)
+    
+    Enum.map(head, &(download_story(&1, "\n\n")))
+    |> Enum.concat(download_story(tail, "\n"))
   end
 
-  def download_story(id) do
+  def download_story(id, delimeter) do
     "https://hacker-news.firebaseio.com/v0/item/" <> to_string(id) <> ".json"
     |> get_body!()
     |> Poison.Parser.parse!()
-    |> format_story()
+    |> format_story(delimeter)
   end
 
-  def format_story(%{"title" => title, "url" => url}) do
-    [title, "\n", url, "\n\n"]
+  def format_story(%{"title" => title, "url" => url}, delimeter) do
+    [title, "\n", url, delimeter]
   end
-  def format_story(_), do: [] # Ignore stories with no URL
+  def format_story(_, _), do: [] # Ignore stories with no URL
 
   def download_topstories() do
     "https://hacker-news.firebaseio.com/v0/topstories.json"

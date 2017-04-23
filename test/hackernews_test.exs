@@ -7,13 +7,15 @@ defmodule HackernewsTest do
   end
 
   test "Story with url is printed" do
+    delimeter = "deadbeef"
     story = %{"title" => "Foo", "url" => "Bar"}
-    assert Hackernews.format_story(story) == ["Foo", "\n", "Bar", "\n\n"]
+    assert Hackernews.format_story(story, delimeter) == ["Foo", "\n", "Bar", delimeter]
   end
 
   test "Story without url is discarded" do
+    delimeter = "deadbeef"
     story = %{"title" => "Foo"}
-    assert Hackernews.format_story(story) == []
+    assert Hackernews.format_story(story, delimeter) == []
   end
 
   # Make sure we write files to local directory
